@@ -131,10 +131,100 @@ var Impresora = (function () {
     return enviarEnPartes(bytes);
   }
 
+  /**
+   * ---- Alternativa para impresoras que NO son BLE genéricas ----
+   * Muchas mini impresoras térmicas baratas (como las que usan la app
+   * "Fun Print") sólo se pueden manejar desde su propia app, con un
+   * protocolo Bluetooth propietario que Web Bluetooth no puede usar.
+   *
+   * Para esos casos, generamos el comprobante como una imagen y usamos el
+   * botón "Compartir" de Android para mandarla directo a esa app (Fun
+   * Print, o la que corresponda), donde se termina de imprimir con un
+   * toque más. Sigue siendo 100% gratuito.
+   */
+  function construirLineasTicket(venta) {
+    var lineas = [];
+    lineas.push({ texto: CONFIG.NOMBRE_KIOSCO || 'Kiosco', negrita: true, align: 'center' });
+    lineas.push({ texto: new Date(venta.fecha || Date.now()).toLocaleString(), align: 'center' });
+    lineas.push({ texto: 'Vendedor: ' + venta.usuario, align: 'left' });
+    lineas.push({ texto: '--------------------------------', align: 'left' });
+    venta.items.forEach(function (it) {
+      lineas.push({ texto: it.cantidad + ' x ' + it.productoNombre, align: 'left' });
+      lineas.push({ texto: CONFIG.MONEDA + it.subtotal.toFixed(2), align: 'right' });
+    });
+    lineas.push({ texto: '--------------------------------', align: 'left' });
+    lineas.push({ texto: 'TOTAL: ' + CONFIG.MONEDA + venta.total.toFixed(2), negrita: true, align: 'left' });
+    lineas.push({ texto: '', align: 'left' });
+    lineas.push({ texto: 'Gracias por su compra!', align: 'center' });
+    return lineas;
+  }
+
+  function generarImagenTicket(venta) {
+    return new Promise(function (resolve) {
+      var ancho = 384; // ancho típico de impresión para papel de 58mm
+      var alturaLinea = 30;
+      var margen = 14;
+      var lineas = construirLineasTicket(venta);
+      var canvas = document.createElement('canvas');
+      canvas.width = ancho;
+      canvas.height = margen * 2 + lineas.length * alturaLinea;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000000';
+      ctx.textBaseline = 'top';
+
+      var y = margen;
+      lineas.forEach(function (l) {
+        ctx.font = (l.negrita ? 'bold ' : '') + '22px monospace';
+        var anchoTexto = ctx.measureText(l.texto).width;
+        var x = margen;
+        if (l.align === 'center') x = (canvas.width - anchoTexto) / 2;
+        else if (l.align === 'right') x = canvas.width - margen - anchoTexto;
+        ctx.fillText(l.texto, x, y);
+        y += alturaLinea;
+      });
+
+      canvas.toBlob(function (blob) { resolve(blob); }, 'image/png');
+    });
+  }
+
+  function puedeCompartirImagenes() {
+    return !!(navigator.share && navigator.canShare);
+  }
+
+  function compartirTicket(venta) {
+    return generarImagenTicket(venta).then(function (blob) {
+      var archivo = new File([blob], 'comprobante.png', { type: 'image/png' });
+
+      if (puedeCompartirImagenes() && navigator.canShare({ files: [archivo] })) {
+        return navigator.share({
+          files: [archivo],
+          title: 'Comprobante de venta'
+        });
+      }
+
+      // Si el navegador no soporta compartir archivos, se descarga la
+      // imagen para poder abrirla e imprimirla manualmente desde la app
+      // de la impresora.
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'comprobante.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      return Promise.resolve();
+    });
+  }
+
   return {
     soportado: soportado,
     conectar: conectar,
     estaConectada: estaConectada,
-    imprimirVenta: imprimirVenta
+    imprimirVenta: imprimirVenta,
+    puedeCompartirImagenes: puedeCompartirImagenes,
+    compartirTicket: compartirTicket
   };
 })();

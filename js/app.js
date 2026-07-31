@@ -201,17 +201,25 @@
   }
 
   function imprimirSiCorresponde(venta) {
-    if (!Impresora.soportado()) {
-      toast('Venta guardada. Impresión Bluetooth no disponible en este navegador (usá Chrome/Android).');
-      return;
+    // 1) Si hay una impresora BLE genérica conectada (ESC/POS estándar), se
+    //    imprime directo sin pasos extra.
+    if (Impresora.soportado() && Impresora.estaConectada()) {
+      return Impresora.imprimirVenta(venta)
+        .then(function () { toast('Comprobante impreso.'); })
+        .catch(function (err) { toast('Venta guardada, pero falló la impresión: ' + err.message, true); });
     }
-    if (!Impresora.estaConectada()) {
-      toast('Venta guardada. Conectá la impresora (botón 🖨️) para imprimir el comprobante.');
-      return;
+    // 2) Muchas impresoras de bolsillo (como las que usan la app "Fun
+    //    Print") no son compatibles con Web Bluetooth: se comparte el
+    //    comprobante como imagen para terminarlo de imprimir desde esa app.
+    if (Impresora.puedeCompartirImagenes()) {
+      return Impresora.compartirTicket(venta)
+        .then(function () { toast('Venta guardada. Elegí la app de tu impresora para imprimir el comprobante.'); })
+        .catch(function (err) {
+          if (err && err.name === 'AbortError') return; // el usuario cerró el menú de compartir
+          toast('Venta guardada, pero no se pudo compartir el comprobante: ' + err.message, true);
+        });
     }
-    return Impresora.imprimirVenta(venta)
-      .then(function () { toast('Comprobante impreso.'); })
-      .catch(function (err) { toast('Venta guardada, pero falló la impresión: ' + err.message, true); });
+    toast('Venta guardada. Este navegador no permite compartir el comprobante automáticamente.');
   }
 
   /* ---------- Impresora: conectar ---------- */
