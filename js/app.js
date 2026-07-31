@@ -21,9 +21,16 @@
   }
   var toastTimeout;
   function toast(msg, esError) {
+    if (esError) {
+      // Los errores se muestran con alert() para que no se pierdan
+      // (el cartel rojo desaparece solo y en el celular a veces no se
+      // alcanza a leer). Además queda un texto que se puede copiar/mandar.
+      alert('⚠️ ' + msg);
+      return;
+    }
     var t = $('toast');
     t.textContent = msg;
-    t.classList.toggle('error', !!esError);
+    t.classList.remove('error');
     t.classList.remove('oculto');
     clearTimeout(toastTimeout);
     toastTimeout = setTimeout(function () { t.classList.add('oculto'); }, 3500);
