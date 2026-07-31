@@ -25,17 +25,14 @@ var Impresora = (function () {
     if (!soportado()) {
       return Promise.reject(new Error('Este navegador no soporta Bluetooth. Usá Chrome en Android.'));
     }
+    // Importante: sólo se puede llamar a requestDevice() UNA vez por click
+    // (necesita "gesto de usuario" activo). Se usa acceptAllDevices para que
+    // aparezcan todas las impresoras cercanas, aunque no anuncien el UUID
+    // exacto que esperamos.
     return navigator.bluetooth.requestDevice({
-      filters: [{ services: [SERVICE_UUID] }],
+      acceptAllDevices: true,
       optionalServices: [SERVICE_UUID]
     })
-      .catch(function () {
-        // Fallback: si la impresora usa otro UUID, dejamos elegir cualquier dispositivo BLE cercano.
-        return navigator.bluetooth.requestDevice({
-          acceptAllDevices: true,
-          optionalServices: [SERVICE_UUID]
-        });
-      })
       .then(function (device) {
         dispositivo = device;
         return device.gatt.connect();
