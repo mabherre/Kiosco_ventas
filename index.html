@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Kiosco - Ventas</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e6f46">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===================== PANTALLA LOGIN ===================== -->
+<section id="pantalla-login" class="pantalla activa">
+  <div class="login-box">
+    <h1>🏪 Kiosco</h1>
+    <p>Ingresá tu nombre para registrar las ventas que hagas.</p>
+    <input type="text" id="input-nombre-usuario" placeholder="Tu nombre" autocomplete="off">
+    <button id="btn-entrar" class="btn btn-primario btn-grande">Entrar</button>
+    <p id="login-error" class="error oculto"></p>
+  </div>
+</section>
+
+<!-- ===================== APP PRINCIPAL ===================== -->
+<div id="app" class="oculto">
+
+  <header class="topbar">
+    <div class="topbar-usuario">👤 <span id="usuario-actual"></span></div>
+    <div class="topbar-acciones">
+      <button id="btn-conectar-impresora" class="btn btn-chico">🖨️ Impresora</button>
+      <button id="btn-cambiar-usuario" class="btn btn-chico">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab activa" data-tab="venta">🛒 Vender</button>
+    <button class="tab" data-tab="productos">📦 Productos</button>
+  </nav>
+
+  <!-- ---------- TAB: VENTA ---------- -->
+  <section id="tab-venta" class="tab-contenido activa">
+    <div class="venta-layout">
+      <div class="lista-productos" id="grid-productos-venta">
+        <!-- tarjetas de producto generadas por JS -->
+      </div>
+
+      <aside class="carrito">
+        <h2>Carrito</h2>
+        <div id="carrito-items" class="carrito-items">
+          <p class="vacio">No hay productos seleccionados</p>
+        </div>
+        <div class="carrito-total">
+          <span>Total</span>
+          <span id="carrito-total-monto">$0</span>
+        </div>
+        <button id="btn-registrar-venta" class="btn btn-primario btn-grande" disabled>Registrar venta e imprimir</button>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ---------- TAB: PRODUCTOS ---------- -->
+  <section id="tab-productos" class="tab-contenido">
+    <button id="btn-nuevo-producto" class="btn btn-primario">+ Nuevo producto</button>
+    <div id="lista-productos-admin" class="lista-productos-admin">
+      <!-- filas generadas por JS -->
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================== MODAL PRODUCTO (alta/edición) ===================== -->
+<div id="modal-producto" class="modal oculto">
+  <div class="modal-contenido">
+    <h2 id="modal-producto-titulo">Nuevo producto</h2>
+    <input type="hidden" id="producto-id">
+    <label>Nombre</label>
+    <input type="text" id="producto-nombre" placeholder="Ej: Alfajor">
+    <label>Precio</label>
+    <input type="number" id="producto-precio" placeholder="Ej: 1500" min="0" step="1">
+    <label>Foto</label>
+    <input type="file" id="producto-foto" accept="image/*" capture="environment">
+    <img id="producto-foto-preview" class="oculto foto-preview">
+    <div class="modal-acciones">
+      <button id="btn-guardar-producto" class="btn btn-primario">Guardar</button>
+      <button id="btn-cancelar-producto" class="btn">Cancelar</button>
+      <button id="btn-eliminar-producto" class="btn btn-peligro oculto">Eliminar</button>
+    </div>
+    <p id="modal-producto-error" class="error oculto"></p>
+  </div>
+</div>
+
+<!-- ===================== OVERLAY DE CARGA ===================== -->
+<div id="overlay-carga" class="overlay oculto">
+  <div class="spinner"></div>
+  <p id="overlay-carga-texto">Cargando...</p>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div id="toast" class="toast oculto"></div>
+
+<script src="js/config.js"></script>
+<script src="js/db.js"></script>
+<script src="js/printer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
