@@ -8,7 +8,7 @@
  * URL_APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycbyHDZ9Cf9VmboDLkMDOIy3a9k9dRn-X__VlUSuB5ry4uqY4hC413dMUKnzqB7Gp1UoTcA/exec'
  */
 var CONFIG = {
-  URL_APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycbwYVLrZY36AmmTy1y3G6Xah1TX8hedyFfUj8F2lTBR_-f2Cl0wPCylUZnLkzQY3pp-E/exec',
+  URL_APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycbyHDZ9Cf9VmboDLkMDOIy3a9k9dRn-X__VlUSuB5ry4uqY4hC413dMUKnzqB7Gp1UoTcA/exec',
   NOMBRE_KIOSCO: 'Kiosco a luka',
   MONEDA: '$',
   // Clave para entrar como Administrador. Es la misma para todos los
