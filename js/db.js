@@ -72,6 +72,14 @@ var DB = (function () {
 
     registrarVenta: function (venta) {
       return llamarBackend('registrarVenta', venta);
+    },
+
+    buscarTransferencias: function (texto) {
+      return llamarBackend('buscarTransferencias', { texto: texto });
+    },
+
+    resumenTransferencias: function () {
+      return llamarBackend('resumenTransferencias');
     }
   };
 })();

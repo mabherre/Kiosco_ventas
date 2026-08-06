@@ -12,13 +12,36 @@
 
 <!-- ===================== PANTALLA LOGIN ===================== -->
 <section id="pantalla-login" class="pantalla activa">
-  <div class="login-box">
+
+  <!-- Paso 1: elegir rol -->
+  <div class="login-box" id="login-paso-rol">
+    <h1>🏪 Kiosco</h1>
+    <p>¿Cómo vas a ingresar?</p>
+    <button id="btn-rol-vendedor" class="btn btn-primario btn-grande">🛒 Vendedor</button>
+    <button id="btn-rol-admin" class="btn btn-grande">🔑 Administrador</button>
+  </div>
+
+  <!-- Paso 2a: nombre (vendedor) -->
+  <div class="login-box oculto" id="login-paso-vendedor">
     <h1>🏪 Kiosco</h1>
     <p>Ingresá tu nombre para registrar las ventas que hagas.</p>
-    <input type="text" id="input-nombre-usuario" placeholder="Tu nombre" autocomplete="off">
-    <button id="btn-entrar" class="btn btn-primario btn-grande">Entrar</button>
-    <p id="login-error" class="error oculto"></p>
+    <input type="text" id="input-nombre-vendedor" placeholder="Tu nombre" autocomplete="off">
+    <button id="btn-entrar-vendedor" class="btn btn-primario btn-grande">Entrar</button>
+    <button id="btn-volver-rol-1" class="btn">Volver</button>
+    <p id="login-error-vendedor" class="error oculto"></p>
   </div>
+
+  <!-- Paso 2b: clave + nombre (administrador) -->
+  <div class="login-box oculto" id="login-paso-admin">
+    <h1>🏪 Kiosco</h1>
+    <p>Ingresá la clave de administrador y tu nombre.</p>
+    <input type="password" id="input-clave-admin" placeholder="Clave" autocomplete="off">
+    <input type="text" id="input-nombre-admin" placeholder="Tu nombre" autocomplete="off">
+    <button id="btn-entrar-admin" class="btn btn-primario btn-grande">Entrar</button>
+    <button id="btn-volver-rol-2" class="btn">Volver</button>
+    <p id="login-error-admin" class="error oculto"></p>
+  </div>
+
 </section>
 
 <!-- ===================== APP PRINCIPAL ===================== -->
@@ -33,12 +56,18 @@
   </header>
 
   <nav class="tabs">
-    <button class="tab activa" data-tab="venta">🛒 Vender</button>
-    <button class="tab" data-tab="productos">📦 Productos</button>
+    <button class="tab" data-tab="venta" data-rol="vendedor">🛒 Vender</button>
+    <button class="tab" data-tab="transferencias" data-rol="vendedor">💳 Transferencias</button>
+    <button class="tab" data-tab="productos" data-rol="admin">📦 Productos</button>
+    <button class="tab" data-tab="resumen" data-rol="admin">📊 Resumen</button>
   </nav>
 
   <!-- ---------- TAB: VENTA ---------- -->
-  <section id="tab-venta" class="tab-contenido activa">
+  <section id="tab-venta" class="tab-contenido">
+    <div id="banner-transferencia" class="banner-transferencia oculto">
+      <span id="banner-transferencia-texto"></span>
+      <button id="btn-quitar-transferencia" class="btn btn-chico">Quitar</button>
+    </div>
     <div class="venta-layout">
       <div class="lista-productos" id="grid-productos-venta">
         <!-- tarjetas de producto generadas por JS -->
@@ -58,11 +87,37 @@
     </div>
   </section>
 
-  <!-- ---------- TAB: PRODUCTOS ---------- -->
+  <!-- ---------- TAB: TRANSFERENCIAS (vendedor) ---------- -->
+  <section id="tab-transferencias" class="tab-contenido">
+    <div class="buscador-transferencias">
+      <input type="text" id="input-buscar-transferencia" placeholder="Buscar por RUN o nombre completo">
+      <button id="btn-buscar-transferencia" class="btn btn-primario">Buscar</button>
+    </div>
+    <div id="resultados-transferencias" class="lista-transferencias">
+      <p class="vacio">Buscá por RUN o nombre para ver transferencias sin usar.</p>
+    </div>
+  </section>
+
+  <!-- ---------- TAB: PRODUCTOS (admin) ---------- -->
   <section id="tab-productos" class="tab-contenido">
     <button id="btn-nuevo-producto" class="btn btn-primario">+ Nuevo producto</button>
     <div id="lista-productos-admin" class="lista-productos-admin">
       <!-- filas generadas por JS -->
+    </div>
+  </section>
+
+  <!-- ---------- TAB: RESUMEN (admin) ---------- -->
+  <section id="tab-resumen" class="tab-contenido">
+    <button id="btn-actualizar-resumen" class="btn">🔄 Actualizar</button>
+    <div class="resumen-cards">
+      <div class="resumen-card">
+        <div class="resumen-card-valor" id="resumen-cantidad">-</div>
+        <div class="resumen-card-label">Transferencias sin usar</div>
+      </div>
+      <div class="resumen-card">
+        <div class="resumen-card-valor" id="resumen-monto">-</div>
+        <div class="resumen-card-label">Monto total sin usar</div>
+      </div>
     </div>
   </section>
 

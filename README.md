@@ -2,11 +2,21 @@
 
 App web (funciona en el navegador Chrome de un celular o tablet Android) para:
 
-- Cargar productos con nombre, precio y foto (CRUD completo).
-- Registrar ventas seleccionando productos y cantidades, con subtotales y total automáticos.
+- Ingresar con dos perfiles: **Vendedor** (solo nombre) y **Administrador** (clave compartida + nombre, para saber quién hizo cada cambio).
+- **Administrador:** CRUD completo de productos con foto, y un resumen con la cantidad y el monto total de transferencias sin usar.
+- **Vendedor:** registrar ventas seleccionando productos y cantidades (con subtotales y total automáticos), y buscar transferencias recibidas por RUN o nombre para aplicarlas a una venta.
 - Guardar todo en una Google Sheet compartida (productos, ventas y detalle de cada venta).
-- Pedir el nombre de quien la usa antes de empezar, para dejarlo registrado en cada venta.
 - Imprimir un comprobante por una impresora térmica Bluetooth (ESC/POS, 58mm) al cerrar cada venta.
+
+### Perfiles y clave de administrador
+
+La clave de administrador es la misma para todas las personas que entren como admin, y se define en `js/config.js` (`CLAVE_ADMIN`). Por defecto queda en `kiosco2026` — cambiala por la que quieras usar. Es una validación simple hecha en el navegador: cualquiera que mire el código fuente de la página podría verla, así que no la uses para datos sensibles, solo para diferenciar quién puede tocar productos y ver el resumen.
+
+### Transferencias
+
+El vendedor busca transferencias en una hoja de cálculo externa (compartida por Mabel), sólo entre las filas cuya columna **Estado Pago** está vacía. Al elegir una, queda visible el monto del abono en la pantalla de venta; al registrar la venta, esa fila se marca automáticamente como **Usado** en la columna Estado Pago (no se borra ni se mueve, solo se marca). El administrador ve, en la pestaña Resumen, cuántas transferencias quedan sin usar y la suma de sus montos.
+
+Para que esto funcione, la cuenta de Google que despliega el Apps Script (la misma que uso para "Ejecutar como: Yo") necesita tener acceso de edición a esa hoja externa de transferencias.
 
 Construida sólo con herramientas gratuitas: HTML/CSS/JavaScript plano + Google Sheets + Google Apps Script + Web Bluetooth API. No requiere servidores pagos, ni tiendas de aplicaciones, ni licencias.
 
@@ -100,4 +110,6 @@ apps-script/Codigo.gs  → backend a pegar en Apps Script (Google Sheets)
 
 **¿Por qué el texto impreso no tiene tildes/ñ?** La mayoría de las impresoras térmicas Bluetooth baratas no soportan bien acentos; el sistema los reemplaza automáticamente por letras simples para que no salgan símbolos raros.
 
-**Mi impresora no aparece al conectar.** Confirmá que esté encendida y en modo visible/emparejamiento, y que sea compatible con Bluetooth Low Energy (BLE) — la mayoría de las térmicas de 58mm lo son. Si usa un chip distinto al más común, avisame el modelo y ajusto los identificadores en `js/printer.js`.
+**Mi impresora no aparece al conectar, o es una mini impresora tipo "Fun Print".** Muchas impresoras de bolsillo baratas (las que se manejan con apps como Fun Print, Cat Printer, Peripage, Phomemo, etc.) usan un protocolo Bluetooth propietario que sólo su propia app sabe hablar — Web Bluetooth no puede conectarse directo a ellas.
+
+Para esos casos, la app tiene un plan B automático: si no hay ninguna impresora BLE genérica conectada, al registrar la venta arma el comprobante como una imagen y abre el menú "Compartir" de Android para que elijas la app de tu impresora (por ejemplo Fun Print) y termines de imprimir ahí con un toque más. No es 100% automático en ese caso, pero sigue siendo gratuito y funciona con este tipo de impresoras.

@@ -61,6 +61,7 @@ body {
   border-radius: 10px;
   border: 1px solid var(--gris-borde);
 }
+.login-box .btn { width: 100%; margin-top: 10px; }
 
 /* ---------- Topbar / Tabs ---------- */
 .topbar {
@@ -208,6 +209,69 @@ body {
 .fila-producto-admin .info { flex: 1; }
 .fila-producto-admin .nombre { font-weight: 600; }
 .fila-producto-admin .precio { color: var(--verde); }
+
+/* ---------- Transferencia: banner en Vender ---------- */
+.banner-transferencia {
+  background: #eaf5ef;
+  border: 1px solid var(--verde);
+  color: var(--verde-oscuro);
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* ---------- Transferencias (vendedor) ---------- */
+.buscador-transferencias {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.buscador-transferencias input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gris-borde);
+  font-size: 16px;
+}
+.lista-transferencias .vacio { color: #999; font-size: 14px; }
+.transferencia-item {
+  background: #fff;
+  border: 1px solid var(--gris-borde);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.transferencia-item .nombre { font-weight: 600; }
+.transferencia-item .detalle { font-size: 13px; color: #666; }
+.transferencia-item .abono { font-weight: 700; color: var(--verde); margin-top: 2px; }
+
+/* ---------- Resumen (admin) ---------- */
+.resumen-cards {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.resumen-card {
+  flex: 1;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+.resumen-card-valor { font-size: 28px; font-weight: 700; color: var(--verde-oscuro); }
+.resumen-card-label { font-size: 13px; color: #666; margin-top: 4px; }
 
 /* ---------- Modal ---------- */
 .modal {

@@ -15,6 +15,18 @@
 
 var CARPETA_FOTOS = 'FotosKiosco';
 
+// Hoja externa donde se registran las transferencias recibidas (abonos de
+// clientes). No es la misma hoja que la del kiosco: se abre por ID.
+var ID_HOJA_TRANSFERENCIAS = '1jEK_0p0WOxA36t7-iOtwZXEdcT8-Xmpl_bzh5_r7nt8';
+var PESTANA_TRANSFERENCIAS = 'registro';
+// Columnas (1-based) de esa hoja, en este orden:
+// Fecha | Documento | Movimiento | RUN | Nombre completo | Abono | Estado | Fila origen | Estado Pago
+var COL_TRANSF_FECHA = 1;
+var COL_TRANSF_RUN = 4;
+var COL_TRANSF_NOMBRE = 5;
+var COL_TRANSF_ABONO = 6;
+var COL_TRANSF_ESTADO_PAGO = 9;
+
 function doGet(e) {
   try {
     var accion = e.parameter.accion || e.parameter.action;
@@ -52,6 +64,12 @@ function doPost(e) {
       case 'registrarVenta':
         resultado = registrarVenta(data);
         break;
+      case 'buscarTransferencias':
+        resultado = buscarTransferencias(data);
+        break;
+      case 'resumenTransferencias':
+        resultado = resumenTransferencias();
+        break;
       default:
         return respond({ ok: false, error: 'Acción POST no reconocida: ' + accion });
     }
@@ -87,7 +105,10 @@ function getVentasSheet_() {
   return getSheet_('Ventas', ['ID', 'Fecha', 'Usuario', 'Total']);
 }
 function getDetalleSheet_() {
-  return getSheet_('DetalleVentas', ['ID', 'VentaID', 'ProductoID', 'ProductoNombre', 'Cantidad', 'PrecioUnitario', 'Subtotal']);
+  // El nombre del producto y el subtotal no se guardan: se pueden obtener
+  // buscando el ProductoID en la hoja Productos y multiplicando
+  // Cantidad x PrecioUnitario.
+  return getSheet_('DetalleVentas', ['ID', 'VentaID', 'ProductoID', 'Cantidad', 'PrecioUnitario']);
 }
 
 /* ---------------- Productos ---------------- */
@@ -160,7 +181,9 @@ function guardarImagenEnDrive_(base64Data, nombreArchivo) {
   var folder = getOrCreateFolder_(CARPETA_FOTOS);
   var file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return 'https://drive.google.com/uc?export=view&id=' + file.getId();
+  // El formato "uc?export=view" de Drive falla seguido al incrustarlo como <img>.
+  // El endpoint "thumbnail" es más confiable para mostrar la foto directo en la app.
+  return 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1000';
 }
 
 function getOrCreateFolder_(nombre) {
@@ -179,23 +202,100 @@ function registrarVenta(data) {
 
   ventasSheet.appendRow([ventaId, fecha, data.usuario || '', Number(data.total) || 0]);
 
+  // Se escriben todas las filas del detalle en una sola llamada (en vez de
+  // una llamada por producto) para que registrar la venta sea más rápido.
   var items = data.items || [];
-  for (var i = 0; i < items.length; i++) {
-    var it = items[i];
-    var detalleId = Utilities.getUuid();
-    detalleSheet.appendRow([
-      detalleId,
-      ventaId,
-      it.productoId,
-      it.productoNombre,
-      Number(it.cantidad) || 0,
-      Number(it.precioUnitario) || 0,
-      Number(it.subtotal) || 0
-    ]);
+  if (items.length > 0) {
+    var filas = items.map(function (it) {
+      return [
+        Utilities.getUuid(),
+        ventaId,
+        it.productoId,
+        Number(it.cantidad) || 0,
+        Number(it.precioUnitario) || 0
+      ];
+    });
+    var filaInicial = detalleSheet.getLastRow() + 1;
+    detalleSheet.getRange(filaInicial, 1, filas.length, filas[0].length).setValues(filas);
+  }
+
+  // Si la venta se hizo a partir de una transferencia seleccionada, se marca
+  // esa fila como usada en la hoja de transferencias.
+  if (data.transferenciaFila) {
+    marcarTransferenciaUsada({ fila: data.transferenciaFila });
   }
 
   return {
     ventaId: ventaId,
     fecha: fecha.toISOString()
   };
+}
+
+/* ---------------- Transferencias ---------------- */
+
+function getHojaTransferencias_() {
+  return SpreadsheetApp.openById(ID_HOJA_TRANSFERENCIAS).getSheetByName(PESTANA_TRANSFERENCIAS);
+}
+
+function normalizarTexto_(s) {
+  return String(s || '').toLowerCase().replace(/[.\-\s]/g, '');
+}
+
+// Busca por RUN o nombre completo, sólo entre las filas cuya columna
+// "Estado Pago" está vacía (todavía no usadas).
+function buscarTransferencias(data) {
+  var termino = normalizarTexto_(data.texto);
+  if (!termino) return { transferencias: [] };
+
+  var sheet = getHojaTransferencias_();
+  var values = sheet.getDataRange().getValues();
+  var resultados = [];
+
+  for (var i = 1; i < values.length; i++) {
+    var fila = values[i];
+    var estadoPago = fila[COL_TRANSF_ESTADO_PAGO - 1];
+    if (estadoPago) continue; // ya usada
+
+    var run = String(fila[COL_TRANSF_RUN - 1] || '');
+    var nombre = String(fila[COL_TRANSF_NOMBRE - 1] || '');
+
+    if (normalizarTexto_(run).indexOf(termino) !== -1 || normalizarTexto_(nombre).indexOf(termino) !== -1) {
+      var fechaCelda = fila[COL_TRANSF_FECHA - 1];
+      resultados.push({
+        fila: i + 1, // número real de la fila en la hoja, para poder marcarla luego
+        fecha: (fechaCelda instanceof Date) ? fechaCelda.toISOString() : String(fechaCelda || ''),
+        run: run,
+        nombreCompleto: nombre,
+        abono: Number(fila[COL_TRANSF_ABONO - 1]) || 0
+      });
+    }
+  }
+
+  return { transferencias: resultados };
+}
+
+function marcarTransferenciaUsada(data) {
+  var fila = Number(data.fila);
+  if (!fila || fila < 2) return { error: 'Fila inválida' };
+  var sheet = getHojaTransferencias_();
+  sheet.getRange(fila, COL_TRANSF_ESTADO_PAGO).setValue('Usado');
+  return { actualizado: true };
+}
+
+// Cantidad y monto total de transferencias todavía sin usar.
+function resumenTransferencias() {
+  var sheet = getHojaTransferencias_();
+  var values = sheet.getDataRange().getValues();
+  var cantidad = 0;
+  var montoTotal = 0;
+
+  for (var i = 1; i < values.length; i++) {
+    var estadoPago = values[i][COL_TRANSF_ESTADO_PAGO - 1];
+    if (!estadoPago) {
+      cantidad++;
+      montoTotal += Number(values[i][COL_TRANSF_ABONO - 1]) || 0;
+    }
+  }
+
+  return { cantidad: cantidad, montoTotal: montoTotal };
 }
