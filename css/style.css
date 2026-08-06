@@ -1,6 +1,8 @@
 :root {
-  --verde: #1e6f46;
-  --verde-oscuro: #144a2f;
+  /* Los nombres de variable quedaron de la paleta original en verde, pero
+     ahora los valores son azul oscuro (no hace falta renombrarlas). */
+  --verde: #1e3a5f;
+  --verde-oscuro: #12233d;
   --rojo: #b3261e;
   --gris-fondo: #f4f5f4;
   --gris-borde: #dcdfdd;
@@ -53,6 +55,13 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 .login-box h1 { margin-top: 0; }
+.logo-inicio {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 10px;
+}
 .login-box input {
   width: 100%;
   font-size: 18px;

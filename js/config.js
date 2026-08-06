@@ -15,4 +15,3 @@ var CONFIG = {
   // administradores. Cambiala por la que quieras usar.
   CLAVE_ADMIN: 'kiosco2026'
 };
- 
