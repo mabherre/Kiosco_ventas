@@ -5,7 +5,7 @@
  * Ver README.md paso 3.
  *
  * Ejemplo:
- * URL_APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycbyHDZ9Cf9VmboDLkMDOIy3a9k9dRn-X__VlUSuB5ry4uqY4hC413dMUKnzqB7Gp1UoTcA/exec'
+ * URL_APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycb.../exec'
  */
 var CONFIG = {
   URL_APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycbyHDZ9Cf9VmboDLkMDOIy3a9k9dRn-X__VlUSuB5ry4uqY4hC413dMUKnzqB7Gp1UoTcA/exec',
@@ -15,3 +15,4 @@ var CONFIG = {
   // administradores. Cambiala por la que quieras usar.
   CLAVE_ADMIN: 'kiosco2026'
 };
+ 
