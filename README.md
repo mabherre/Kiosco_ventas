@@ -8,9 +8,13 @@ App web (funciona en el navegador Chrome de un celular o tablet Android) para:
 - Guardar todo en una Google Sheet compartida (productos, ventas y detalle de cada venta).
 - Imprimir un comprobante por una impresora térmica Bluetooth (ESC/POS, 58mm) al cerrar cada venta.
 
-### Perfiles y clave de administrador
+### Perfiles y claves
 
-La clave de administrador es la misma para todas las personas que entren como admin, y se define en `js/config.js` (`CLAVE_ADMIN`). Por defecto queda en `kiosco2026` — cambiala por la que quieras usar. Es una validación simple hecha en el navegador: cualquiera que mire el código fuente de la página podría verla, así que no la uses para datos sensibles, solo para diferenciar quién puede tocar productos y ver el resumen.
+Tanto Administrador como Vendedor piden una clave compartida (la misma para todas las personas de ese perfil) además del nombre. Se definen en `js/config.js`: `CLAVE_ADMIN` (por defecto `kiosco2026`) y `CLAVE_VENDEDOR` (por defecto `ventas2026`). Cambialas por las que quieras usar.
+
+Además del filtro visual, el backend (`Codigo.gs`) valida esas mismas claves: `CLAVE_ADMIN` antes de agregar, editar o borrar productos; `CLAVE_VENDEDOR` antes de registrar una venta o buscar transferencias. También exige un `TOKEN_APP` en cada pedido para que no cualquiera que encuentre la URL de Apps Script pueda usarla directo sin pasar por la app. **Importante:** `CLAVE_ADMIN`, `CLAVE_VENDEDOR` y `TOKEN_APP` tienen que ser idénticos en `js/config.js` y en `Codigo.gs` — si cambiás uno, cambiá el otro y volvé a desplegar una nueva versión en Apps Script.
+
+Dicho esto, como es una app 100% del lado del cliente (sin usuarios reales con contraseña propia), estos valores quedan visibles para cualquiera que revise el código fuente de la página o el repositorio de GitHub. Es una barrera razonable contra un uso casual o accidental, no una seguridad real de nivel empresarial — no seria buena idea usar esta app para datos más sensibles que los que ya maneja (productos, ventas, y el RUN/nombre de las transferencias).
 
 ### Transferencias
 
