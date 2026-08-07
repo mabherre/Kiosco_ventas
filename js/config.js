@@ -13,5 +13,12 @@ var CONFIG = {
   MONEDA: '$',
   // Clave para entrar como Administrador. Es la misma para todos los
   // administradores. Cambiala por la que quieras usar.
-  CLAVE_ADMIN: 'kiosco2026'
+  CLAVE_ADMIN: 'kiosco2026',
+  // Clave para entrar como Vendedor. Es la misma para todos los vendedores
+  // (distinta a la de administrador). Cambiala por la que quieras usar.
+  CLAVE_VENDEDOR: 'ventas2026',
+  // Token que viaja en cada pedido al backend para que Apps Script sepa que
+  // viene de esta app. Tiene que ser IDÉNTICO al TOKEN_APP de Codigo.gs —
+  // si cambiás uno, cambiá el otro.
+  TOKEN_APP: 'kioscoAppSecreto2026'
 };

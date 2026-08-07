@@ -85,13 +85,22 @@
 
   // Paso 2a: entrar como vendedor
   $('btn-entrar-vendedor').addEventListener('click', function () {
+    var clave = $('input-clave-vendedor').value;
     var nombre = $('input-nombre-vendedor').value.trim();
+    if (clave !== CONFIG.CLAVE_VENDEDOR) {
+      $('login-error-vendedor').textContent = 'Clave incorrecta.';
+      $('login-error-vendedor').classList.remove('oculto');
+      return;
+    }
     if (!nombre) {
       $('login-error-vendedor').textContent = 'Ingresá tu nombre para continuar.';
       $('login-error-vendedor').classList.remove('oculto');
       return;
     }
     entrarComo('vendedor', nombre);
+  });
+  $('input-clave-vendedor').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('btn-entrar-vendedor').click();
   });
   $('input-nombre-vendedor').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') $('btn-entrar-vendedor').click();

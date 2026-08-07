@@ -19,7 +19,9 @@ var DB = (function () {
     if (!urlConfigurada()) {
       return Promise.reject(new Error('Falta configurar la URL de Apps Script en js/config.js'));
     }
-    var body = Object.assign({ accion: accion }, payload || {});
+    // Todas las peticiones llevan el token de la app, para que el backend
+    // sepa que vienen de acá y no de cualquiera que le pegue a la URL.
+    var body = Object.assign({ accion: accion, tokenApp: CONFIG.TOKEN_APP }, payload || {});
     return fetch(CONFIG.URL_APPS_SCRIPT, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -58,24 +60,28 @@ var DB = (function () {
         });
     },
 
+    // Estas tres acciones son sólo de Administrador: además del token de la
+    // app, mandan la clave de administrador para que el backend la valide.
     agregarProducto: function (producto) {
-      return llamarBackend('agregarProducto', producto);
+      return llamarBackend('agregarProducto', Object.assign({ claveAdmin: CONFIG.CLAVE_ADMIN }, producto));
     },
 
     actualizarProducto: function (producto) {
-      return llamarBackend('actualizarProducto', producto);
+      return llamarBackend('actualizarProducto', Object.assign({ claveAdmin: CONFIG.CLAVE_ADMIN }, producto));
     },
 
     eliminarProducto: function (id) {
-      return llamarBackend('eliminarProducto', { id: id });
+      return llamarBackend('eliminarProducto', { id: id, claveAdmin: CONFIG.CLAVE_ADMIN });
     },
 
+    // Estas dos acciones son sólo de Vendedor: mandan la clave de vendedor
+    // para que el backend la valide.
     registrarVenta: function (venta) {
-      return llamarBackend('registrarVenta', venta);
+      return llamarBackend('registrarVenta', Object.assign({ claveVendedor: CONFIG.CLAVE_VENDEDOR }, venta));
     },
 
     buscarTransferencias: function (texto) {
-      return llamarBackend('buscarTransferencias', { texto: texto });
+      return llamarBackend('buscarTransferencias', { texto: texto, claveVendedor: CONFIG.CLAVE_VENDEDOR });
     },
 
     resumenTransferencias: function () {
