@@ -15,6 +15,17 @@
 
 var CARPETA_FOTOS = 'FotosKiosco';
 
+// Estos dos valores tienen que ser IDÉNTICOS a los de js/config.js
+// (TOKEN_APP y CLAVE_ADMIN). Si los cambiás acá, cambialos también allá.
+var TOKEN_APP = 'kioscoAppSecreto2026';
+var CLAVE_ADMIN = 'kiosco2026';
+var CLAVE_VENDEDOR = 'ventas2026';
+
+// Acciones que sólo puede hacer un Administrador (requieren CLAVE_ADMIN).
+var ACCIONES_SOLO_ADMIN = ['agregarProducto', 'actualizarProducto', 'eliminarProducto'];
+// Acciones que sólo puede hacer un Vendedor (requieren CLAVE_VENDEDOR).
+var ACCIONES_SOLO_VENDEDOR = ['registrarVenta', 'buscarTransferencias'];
+
 // Hoja externa donde se registran las transferencias recibidas (abonos de
 // clientes). No es la misma hoja que la del kiosco: se abre por ID.
 var ID_HOJA_TRANSFERENCIAS = '1jEK_0p0WOxA36t7-iOtwZXEdcT8-Xmpl_bzh5_r7nt8';
@@ -47,6 +58,24 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
     var accion = data.accion || data.action;
     var resultado;
+
+    // Filtro 1: todas las peticiones tienen que traer el token de la app.
+    // Esto no reemplaza una autenticación real (el token vive en un archivo
+    // público del sitio), pero frena a quien golpee esta URL sin pasar por
+    // la app.
+    if (data.tokenApp !== TOKEN_APP) {
+      return respond({ ok: false, error: 'No autorizado.' });
+    }
+
+    // Filtro 2: las acciones de administrador además necesitan la clave.
+    if (ACCIONES_SOLO_ADMIN.indexOf(accion) !== -1 && data.claveAdmin !== CLAVE_ADMIN) {
+      return respond({ ok: false, error: 'Clave de administrador incorrecta.' });
+    }
+
+    // Filtro 3: las acciones de vendedor además necesitan su clave.
+    if (ACCIONES_SOLO_VENDEDOR.indexOf(accion) !== -1 && data.claveVendedor !== CLAVE_VENDEDOR) {
+      return respond({ ok: false, error: 'Clave de vendedor incorrecta.' });
+    }
 
     switch (accion) {
       case 'getProductos':
